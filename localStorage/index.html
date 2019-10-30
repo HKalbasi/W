@@ -1,0 +1,42 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<script>
+			const evil = eval;
+			const W = {
+				read: async (x) => window.localStorage.getItem(x),
+				write: async (x, y) => window.localStorage.setItem(x, y),
+				list: async () => Object.keys(window.localStorage),
+				reload: async () => {
+					let url = window.location.pathname;
+					url = url.substr(1);
+					if (url === '') url = 'home';
+					url = url.split('/');
+					const source = await W.read(url[0]);
+					if (source == undefined) {
+						document.body.innerText = `${url} not found`;
+						return;
+					}
+					const Obj = evil(source)(W);
+					W.graphicEngine.update(await Obj.run(url));
+				},
+				goto: async (url) => {
+					window.history.pushState({},"",url);
+					return W.reload();
+				},
+			};
+			(async () => {
+				const G = evil(await W.read('graphic-engine'))(W);
+				G.init();
+				W.graphicEngine = G;
+				//W.reload();
+			})()
+			document.addEventListener('click', (e) => {
+				if (e.target.tagName !=='A') return;
+				e.preventDefault();
+				W.goto(e.target.href);
+			});
+		</script>
+	</body>
+</html>
