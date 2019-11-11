@@ -11,6 +11,7 @@ const names = [
   'wiki',
   'wikiedit',
   'calender',
+  'deadline',
 ];
 
 const main = async () => {
