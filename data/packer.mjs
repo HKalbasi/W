@@ -10,6 +10,7 @@ const names = [
   'graphic-engine',
   'wiki',
   'wikiedit',
+  'calender',
 ];
 
 const main = async () => {

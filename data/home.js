@@ -1,5 +1,5 @@
 (W) => ({
-  run: () => {
+  run: async () => {
     const urlDiv = (()=>{
       const inp = document.createElement('input');
       const but = document.createElement('button');
@@ -33,10 +33,67 @@
       div.appendChild(link);
       return div;
     })();
+    const nowWorkDiv = await ((async ()=>{
+      const dateF = (x) => {
+        const a = x.toLocaleDateString(
+          "en-u-ca-persian",
+          {year: "2-digit",month:"2-digit",day:"2-digit"},
+        ).split('/');
+        return `${a[2]}-${a[0]}-${a[1]}`;
+      };
+      const todayLink = document.createElement('div');
+      todayLink.innerHTML = `امروز <a href="/calender/${dateF(new Date)}">${
+        (new Date).toLocaleDateString("fa",{year: "numeric",month:"long",day:"numeric"})
+      }</a> است.`;
+      const nowWork = await W.read('calender/timeline-now');
+      if (!nowWork || nowWork === 'none') {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        const button = document.createElement('button');
+        button.innerText = 'کار را شروع کن';
+        button.onclick = async () => {
+          await W.write('calender/timeline-now', JSON.stringify({
+            name: inp.value,
+            time: new Date(),
+          }));
+          await W.reload();
+        };
+        const div = document.createElement('div');
+        div.appendChild(inp);
+        div.appendChild(button);
+        div.appendChild(todayLink);
+        return div;  
+      }
+      const nwo = JSON.parse(nowWork);
+      const lbl = document.createElement('span');
+      lbl.innerText = `شما در حال ${nwo.name} هستید`;
+      const btn = document.createElement('button');
+      btn.innerText = 'پایان';
+      btn.onclick = async () => {
+        const todayUrl = `calender/timeline/${dateF(new Date)}`;
+        const today = JSON.parse((await W.read(todayUrl)) || "[]");
+        today.push({
+          name: nwo.name,
+          start: nwo.time,
+          end: new Date(),
+        });
+        await Promise.all([
+          W.write(todayUrl, JSON.stringify(today)),
+          W.write('calender/timeline-now','none'),
+        ]);
+        await W.reload();
+      };
+      const div = document.createElement('div');
+      div.appendChild(lbl);
+      div.appendChild(btn);
+      div.appendChild(todayLink);
+      return div;
+    })());
     const div = document.createElement('div');
     div.appendChild(urlDiv);
     div.appendChild(wikiDiv);
     div.appendChild(backupDiv);
+    div.appendChild(nowWorkDiv);
     return {type:'dom', data: div};
   },
 })
