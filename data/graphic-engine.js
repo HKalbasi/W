@@ -10,6 +10,12 @@
   )
   return ({
   init: () => {
+    const x = W.reload;
+    W.reload = async (...args) => {
+      document.body.className = 'spin';
+      await x(...args);
+      document.body.className = '';
+    };
     document.head.innerHTML = `
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -46,6 +52,29 @@
     text-decoration: none;
     color: fuchsia;
   }
+  @keyframes spinner {
+    0% {
+    transform: translate3d(-50%, -50%, 0) rotate(0deg);
+    }
+    100% {
+    transform: translate3d(-50%, -50%, 0) rotate(360deg);
+    }
+    }
+    .spin::before {
+    animation: 1.5s linear infinite spinner;
+    animation-play-state: inherit;
+    border: solid 2vmin #cfd0d1;
+    border-bottom-color: #1c87c9;
+    border-radius: 50%;
+    content: "";
+    height: 20vmin;
+    width: 20vmin;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform;
+    }
 </style>
     `;
     document.body.dir = 'rtl';
