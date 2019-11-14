@@ -89,11 +89,20 @@
       div.appendChild(todayLink);
       return div;
     })());
+    const deadlineDiv = (()=>{
+      const link = document.createElement('a');
+      link.href = "/deadline";
+      link.innerText = `مشاهده ددلاین ها`;
+      const div = document.createElement('div');
+      div.appendChild(link);
+      return div;
+    })();
     const div = document.createElement('div');
     div.appendChild(urlDiv);
     div.appendChild(wikiDiv);
     div.appendChild(backupDiv);
     div.appendChild(nowWorkDiv);
+    div.appendChild(deadlineDiv);
     return {type:'dom', data: div};
   },
 })
