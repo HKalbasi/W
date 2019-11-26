@@ -1,5 +1,20 @@
 (W) => ({
   run: async () => {
+    const msToDur = (ms) => {
+      ms = Math.round(ms/1000);
+      let div = (x,y)=>Math.floor(x/y);
+      let s = ms%60;
+      ms = div(ms,60);
+      let m = ms%60;
+      ms = div(ms,60);
+      let h = ms%24;
+      let d = div(ms,24);
+      s = (s === 0?'':`${s} ثانیه`);
+      m = (m === 0?'':`${m} دقیقه`);
+      h = (h === 0?'':`${h} ساعت`);
+      d = (d === 0?'':`${d} روز`);
+      return `${d} ${h} ${m} ${s}`;
+    };
     const urlDiv = (()=>{
       const inp = document.createElement('input');
       const but = document.createElement('button');
@@ -73,7 +88,8 @@
       const lbl = document.createElement('span');
       lbl.innerText = `شما در حال ${nwo.name} هستید به مدت: `;
       const timeX = document.createElement('span');
-      timeX.innerText = new Date() - new Date(nwo.time);
+      timeX.innerText = msToDur(new Date() - new Date(nwo.time));
+      setInterval(()=>timeX.innerText = msToDur(new Date() - new Date(nwo.time)), 1000);
       const btn = document.createElement('button');
       btn.innerText = 'پایان';
       btn.onclick = async () => {
