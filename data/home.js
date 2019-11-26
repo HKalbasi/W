@@ -52,6 +52,11 @@
         const button = document.createElement('button');
         button.innerText = 'کار را شروع کن';
         button.onclick = async () => {
+          const checkRace = await W.read('calender/timeline-now');
+          if (checkRace !== nowWork) {
+            alert('شما قبلا کار دیگری را شروع کرده اید. لطفا مجددا سعی کنید.');
+            return W.reload();
+          }
           await W.write('calender/timeline-now', JSON.stringify({
             name: inp.value,
             time: new Date(),
@@ -66,10 +71,17 @@
       }
       const nwo = JSON.parse(nowWork);
       const lbl = document.createElement('span');
-      lbl.innerText = `شما در حال ${nwo.name} هستید`;
+      lbl.innerText = `شما در حال ${nwo.name} هستید به مدت: `;
+      const timeX = document.createElement('span');
+      timeX.innerText = new Date() - new Date(nwo.time);
       const btn = document.createElement('button');
       btn.innerText = 'پایان';
       btn.onclick = async () => {
+        const checkRace = await W.read('calender/timeline-now');
+        if (checkRace !== nowWork) {
+          alert('شما قبلا این کار را تمام کرده اید. لطفا مجددا سعی کنید.');
+          return W.reload();
+        }
         const todayUrl = `calender/timeline/${dateF(new Date)}`;
         const today = JSON.parse((await W.read(todayUrl)) || "[]");
         today.push({
@@ -85,6 +97,7 @@
       };
       const div = document.createElement('div');
       div.appendChild(lbl);
+      div.appendChild(timeX);
       div.appendChild(btn);
       div.appendChild(todayLink);
       return div;
