@@ -1,5 +1,23 @@
 (W) => ({
   run: async (url) => {
+    const templat = await ((async ()=>{
+      const data = (await W.read('wiki/calenderTemplate')).split('\n');
+      const ar = [];
+      let cur;
+      for (const x of data) {
+        if (x[0] === '*') {
+          cur = [];
+          ar.push({
+            name: x.substring(2),
+            data: cur,
+          });
+        }
+        else {
+          cur.push(x);
+        }
+      }
+      return ar;
+    })());
     const msToDur = (ms) => {
       ms = Math.round(ms/1000);
       let div = (x,y)=>Math.floor(x/y);
@@ -96,8 +114,21 @@
       const x = await W.read(tlurl);
       if (!x) { 
         const div = document.createElement('div');
-        div.innerText = `این روز را از تمپلیت پر کنید.`;
-        await W.write(tlurl, '[]');
+        const select = document.createElement('select');
+        templat.forEach((x, i)=>{
+          const op = document.createElement('option');
+          op.innerText = x.name;
+          op.value = i;
+          select.appendChild(op);
+        });
+        const btn = document.createElement('button');
+        btn.innerText = 'بساز';
+        btn.onclick = async () => {
+          await W.write(tlurl, JSON.stringify(templat[select.value].data));
+          await W.reload();
+        };
+        div.appendChild(select);
+        div.appendChild(btn);
         return div;
       };
       const res = document.createElement('div');
@@ -108,8 +139,25 @@
         span.innerText = d;
         const btnDo = document.createElement('button');
         btnDo.innerText = 'الان دارم انجامش می دم';
+        btnDo.onclick = async () => {
+          const checkRace = await W.read('calender/timeline-now');
+          if (checkRace !== 'none') {
+            alert(`شما در حال ${JSON.parse(checkRace).name} هستید. ابتدا آن را تمام کنید.`);
+            return W.reload();
+          }
+          await W.write('calender/timeline-now', JSON.stringify({
+            name: d,
+            time: new Date(),
+          }));
+          await W.reload();
+        };
         const btnDone = document.createElement('button');
         btnDone.innerText = 'انجامش دادم'; 
+        btnDone.onclick = async () => {
+          const nextx = xx.filter(k => k !== d);
+          await W.write(tlurl, JSON.stringify(nextx));
+          await W.reload();
+        };
         me.appendChild(span);
         me.appendChild(btnDo);
         me.appendChild(btnDone);
