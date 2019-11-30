@@ -91,9 +91,49 @@
     navigatior.innerHTML = `${dateFtoL(nurl)} <a href="/calender/${
       dateFnext(nurl)
     }">روز بعد</a> <a href="/calender/${dateFprev(nurl)}">روز قبل</a>`;
+    const tasktable = await ((async ()=>{
+      const tlurl = `calender/tasks/${nurl}`;
+      const x = await W.read(tlurl);
+      if (!x) { 
+        const div = document.createElement('div');
+        div.innerText = `این روز را از تمپلیت پر کنید.`;
+        await W.write(tlurl, '[]');
+        return div;
+      };
+      const res = document.createElement('div');
+      const xx = JSON.parse(x);
+      xx.map(d => {
+        const me = document.createElement('div');
+        const span = document.createElement('span');
+        span.innerText = d;
+        const btnDo = document.createElement('button');
+        btnDo.innerText = 'الان دارم انجامش می دم';
+        const btnDone = document.createElement('button');
+        btnDone.innerText = 'انجامش دادم'; 
+        me.appendChild(span);
+        me.appendChild(btnDo);
+        me.appendChild(btnDone);
+        return me;
+      }).forEach(f => res.appendChild(f));
+      const nn = document.createElement('input');
+      nn.type = 'text';
+      const btn = document.createElement('button');
+      btn.innerText = 'اضافه کن';
+      btn.onclick = async () => {
+        xx.push(nn.value);
+        await W.write(tlurl, JSON.stringify(xx));
+        await W.reload();
+      };
+      const addDiv = document.createElement('div');
+      addDiv.appendChild(nn);
+      addDiv.appendChild(btn);
+      res.appendChild(addDiv);
+      return res;
+    })());
     const div = document.createElement('div');
-    div.append(navigatior);
-    div.append(tltable);
+    div.appendChild(navigatior);
+    div.appendChild(tltable);
+    div.appendChild(tasktable);
     return { type: 'dom', data: div };
   },
 })
